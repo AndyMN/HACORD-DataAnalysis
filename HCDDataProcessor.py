@@ -114,7 +114,7 @@ class HCDDataProcessor:
             if num_datapoints_in_bin > 0:
                 pressure_average /= num_datapoints_in_bin
                 pressures_average.append(pressure_average)
-                #  TO DO: ADD APPROPRIATE ERROR CALCULATION FOR PRESSURE CENTERS, TOO LAZY ATM
+                #  TODO: ADD APPROPRIATE ERROR CALCULATION FOR PRESSURE CENTERS, TOO LAZY ATM
                 pressures_error.append(math.sqrt(abs(pressure_average)))
 
 
