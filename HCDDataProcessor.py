@@ -4,7 +4,7 @@ import numpy as np
 class HCDDataProcessor:
 
     def __init__(self):
-        pass
+        self.pressure_sensor_deviation = 0.5  # Deviation of the NPA 500B Pressure Sensor used in the experiments
 
 
     def remove_peaks(self, data):
@@ -105,17 +105,26 @@ class HCDDataProcessor:
             begin_pressurebin = float(max_pressure - bin * binsize)
             end_pressurebin = float(begin_pressurebin - binsize)
             pressure_average = 0
+            pressure_error = 0
             num_datapoints_in_bin = 0
+            pressures_in_bin = []
 
             for i, pressure in enumerate(pressure_data):
                 if end_pressurebin < pressure <= begin_pressurebin:
                     num_datapoints_in_bin += 1
                     pressure_average += pressure
+                    pressures_in_bin.append(pressure)
             if num_datapoints_in_bin > 0:
                 pressure_average /= num_datapoints_in_bin
                 pressures_average.append(pressure_average)
-                #  TODO: ADD APPROPRIATE ERROR CALCULATION FOR PRESSURE CENTERS, TOO LAZY ATM
-                pressures_error.append(math.sqrt(abs(pressure_average)))
+                if num_datapoints_in_bin > 1:
+                    for pressure_val in pressures_in_bin:
+                        pressure_error += (pressure_val - pressure_average) ** 2
+                    pressure_error *= 1 / (num_datapoints_in_bin * (num_datapoints_in_bin - 1))
+                    pressure_error **= 1/2
+                else:
+                    pressure_error = self.pressure_sensor_deviation
+                pressures_error.append(pressure_error)
 
 
         return np.array(pressures_average), np.array(pressures_error)
