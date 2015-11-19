@@ -1,11 +1,13 @@
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 class HCDDataProcessor:
 
     def __init__(self):
         self.pressure_sensor_deviation = 0.5  # Deviation of the NPA 500B Pressure Sensor used in the experiments
-
+        self.peak_boundary_xmin = 0
+        self.peak_boundary_xmax = 0
 
     def remove_peaks(self, data):
         """
@@ -197,3 +199,41 @@ class HCDDataProcessor:
             if array_lengths[0] != length:
                 lengths_ok = False
         return lengths_ok
+
+
+    def set_peak_boundaries(self, xmin=None, xmax=None, x=[], y=[]):
+        if xmin == None or xmax == None:
+            if len(x) == 0 and len(y) == 0:
+                print "If no xmin or xmax are defined, pass x and y vectors to the function so that appropriate boundaries can be chosen from a plot"
+            else:
+                fig = plt.figure()
+                plt.plot(x, y, "o")
+                plt.title('Click on the boundaries of the desired peak. Close plot after.')
+
+                peak_boundaries = []
+
+                def onclick(event):
+                    ix = event.xdata
+                    print 'x = %f' % ix
+
+                    peak_boundaries.append(ix)
+
+                    if len(peak_boundaries) == 2:
+                        fig.canvas.mpl_disconnect(cid)
+
+                cid = fig.canvas.mpl_connect('button_press_event', onclick)
+
+                plt.show()
+
+                self.peak_boundary_xmin = min(peak_boundaries)
+                self.peak_boundary_xmax = max(peak_boundaries)
+
+                print "Chosen boundaries: xmin = %f, xmax = %f" % (self.peak_boundary_xmin, self.peak_boundary_xmax)
+                print "Save these boundaries for future use so that you don't need to click on the plot anymore."
+        else:
+            if xmin == xmax:
+                print "Boundaries have same value ! Pass different boundaries"
+            else:
+                self.peak_boundary_xmin = min([xmin, xmax])
+                self.peak_boundary_xmax = max([xmin, xmax])
+        return [self.peak_boundary_xmin, self.peak_boundary_xmax]
