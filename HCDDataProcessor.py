@@ -6,8 +6,8 @@ class HCDDataProcessor:
 
     def __init__(self):
         self.pressure_sensor_deviation = 0.5  # Deviation of the NPA 500B Pressure Sensor used in the experiments
-        self.peak_boundary_xmin = 0
-        self.peak_boundary_xmax = 0
+        self.peak_boundary_xmin = None
+        self.peak_boundary_xmax = None
 
     def remove_peaks(self, data):
         """
@@ -237,3 +237,17 @@ class HCDDataProcessor:
                 self.peak_boundary_xmin = min([xmin, xmax])
                 self.peak_boundary_xmax = max([xmin, xmax])
         return [self.peak_boundary_xmin, self.peak_boundary_xmax]
+
+    def extract_peak(self, x, y):
+        if self.peak_boundary_xmin == None or self.peak_boundary_xmax == None:
+            print "Define the peak boundaries first !"
+        else:
+            peak_x = []
+            peak_y = []
+
+            for i, element in enumerate(x):
+                if self.peak_boundary_xmin <= element <= self.peak_boundary_xmax:
+                    peak_x.append(element)
+                    peak_y.append(y[i])
+
+            return peak_x, peak_y
