@@ -243,11 +243,15 @@ class HCDDataProcessor:
             print "Define the peak boundaries first !"
         else:
             peak_x = []
+            peak_x_errors = []
             peak_y = []
+            peak_y_errors = []
 
-            for i, element in enumerate(x):
+            for i, element in enumerate(x[0]):
                 if self.peak_boundary_xmin <= element <= self.peak_boundary_xmax:
                     peak_x.append(element)
-                    peak_y.append(y[i])
+                    peak_x_errors.append(x[1][i])
+                    peak_y.append(y[0][i])
+                    peak_y_errors.append(y[1][i])
 
-            return peak_x, peak_y
+            return [peak_x, peak_x_errors], [peak_y, peak_y_errors]
