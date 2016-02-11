@@ -1,6 +1,8 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import interpolate
+
 
 class HCDDataProcessor:
 
@@ -8,6 +10,10 @@ class HCDDataProcessor:
         self.pressure_sensor_deviation = 0.5  # Deviation of the NPA 500B Pressure Sensor used in the experiments
         self.peak_boundary_xmin = None
         self.peak_boundary_xmax = None
+
+        # Splines that get set when pfotzer max is used so that we can make plots with the splines
+        self.peak_spline = None
+        self.derivative_peak_spline = None
 
     def remove_peaks(self, data):
         """
@@ -254,4 +260,41 @@ class HCDDataProcessor:
                     peak_y.append(y[0][i])
                     peak_y_errors.append(y[1][i])
 
-            return [peak_x, peak_x_errors], [peak_y, peak_y_errors]
+            return [peak_x, peak_x_errors], [peak_y, peak_y_errors], len(peak_x)
+
+    def pfotzer_max(self, peak_x, peak_y):
+        pfotzer_max = 0
+        pfotzer_max_error = 0
+
+        weight = [1./x for x in peak_y[1]]
+        sorted_x, sorted_y, sorted_weight = (list(x) for x in zip(*sorted(zip(peak_x[0], peak_y[0], weight))))
+
+        smoothing_factor = 0.0
+        basic_spline = interpolate.UnivariateSpline(sorted_x, sorted_y, w=sorted_weight, s=smoothing_factor, k=4)
+        derivative_spline = basic_spline.derivative(1)
+        roots = derivative_spline.roots()
+        while len(roots) is not 1:
+            smoothing_factor += 0.001
+            basic_spline = interpolate.UnivariateSpline(sorted_x, sorted_y, w=sorted_weight, s=smoothing_factor, k=4)
+            derivative_spline = basic_spline.derivative(1)
+            roots = derivative_spline.roots()
+            #print len(roots)
+            #print smoothing_factor
+
+        self.peak_spline = basic_spline
+        self.derivative_peak_spline = derivative_spline
+
+        pfotzer_max = roots[0]
+        pfotzer_max_error = self.__MAE_pfotzer_spline__(peak_x, peak_y)
+
+        return pfotzer_max, pfotzer_max_error
+
+
+    def __MAE_pfotzer_spline__(self, peak_x, peak_y):
+        yfit = self.peak_spline(peak_x[0])
+        average_error = 0
+        for i, yval in enumerate(yfit):
+            average_error += (yval - peak_y[0][i])**2
+        average_error /= len(yfit)
+
+        return average_error

@@ -70,20 +70,43 @@ pressures_KMI_average, pressures_KMI_error = KMI_processor.pressurebin_centers(p
 gm_KMI_weighted_average, gm_KMI_weighted_error = KMI_processor.weighted_average([gm1_KMI_average, gm2_KMI_average, gm3_KMI_average, gm4_KMI_average], [gm1_KMI_error, gm2_KMI_error, gm3_KMI_error, gm4_KMI_error])
 
 ################################################################################################################
+############################################## KNMI 04-2015 ####################################################################
+KNMI_reader = HCDDataReader("./Datasets/KNMI042015", software_version=2)
+KNMI_processor = HCDDataProcessor()
+KNMI_processor.remove_peaks(KNMI_reader.data)
+
+pressure_KNMI = KNMI_reader.data["press1"]
+gm1_KNMI = np.array(KNMI_reader.data["gm1"])
+gm2_KNMI = np.array(KNMI_reader.data["gm2"])
+gm3_KNMI = np.array(KNMI_reader.data["gm3"])
+gm4_KNMI = np.array(KNMI_reader.data["gm4"])
+
+
+gm1_KNMI_average, gm1_KNMI_error, gm1_KNMI_binpoints = KNMI_processor.average_counts_over_pressure(gm1_KNMI, pressure_KNMI, binsize=pressure_binsize)
+gm2_KNMI_average, gm2_KNMI_error, gm2_KNMI_binpoints = KNMI_processor.average_counts_over_pressure(gm2_KNMI, pressure_KNMI, binsize=pressure_binsize)
+gm3_KNMI_average, gm3_KNMI_error, gm3_KNMI_binpoints = KNMI_processor.average_counts_over_pressure(gm3_KNMI, pressure_KNMI, binsize=pressure_binsize)
+gm4_KNMI_average, gm4_KNMI_error, gm4_KNMI_binpoints = KNMI_processor.average_counts_over_pressure(gm4_KNMI, pressure_KNMI, binsize=pressure_binsize)
+
+
+pressures_KNMI_average, pressures_KNMI_error = KNMI_processor.pressurebin_centers(pressure_KNMI, binsize=pressure_binsize)
+gm_KNMI_weighted_average, gm_KNMI_weighted_error = KNMI_processor.weighted_average([gm1_KNMI_average, gm2_KNMI_average, gm3_KNMI_average, gm4_KNMI_average], [gm1_KNMI_error, gm2_KNMI_error, gm3_KNMI_error, gm4_KNMI_error])
+
+
 
 fig = pylab.figure(1, figsize=(10.0, 10.0))
 ax = fig.add_subplot(1, 1, 1)
 ax.errorbar(pressures_BX_average, gm_BX_weighted_average, yerr=gm_BX_weighted_error, fmt='o')
 ax.errorbar(pressures_KMI_average, gm_KMI_weighted_average, yerr=gm_KMI_weighted_error, fmt='*')
+ax.errorbar(pressures_KNMI_average, gm_KNMI_weighted_average, yerr=gm_KNMI_weighted_error, fmt='x')
 ax.set_xscale('log')
 ax.set_xlim([1, 100])
 ax.set_ylim([0, 45])
 pylab.rcParams["legend.numpoints"] = 1
 pylab.rcParams.update({'font.size': 22})
 pylab.grid(True)
-pylab.xlabel("Atmosferische druk (kPa)")
+pylab.xlabel("Atmospheric pressure (kPa)")
 pylab.ylabel("Flux (counts/s)")
-pylab.legend(["Zweden", "Belgie"])
+pylab.legend(["BEXUS", "RMIB", "RMIN"])
 pylab.savefig("totalcounts_compared_05kPa_binsize.png")
 
 pylab.show()
