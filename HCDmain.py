@@ -93,7 +93,7 @@ gm_KNMI_weighted_average, gm_KNMI_weighted_error = KNMI_processor.weighted_avera
 
 
 
-fig = pylab.figure(1, figsize=(10.0, 10.0))
+fig = pylab.figure(1)
 ax = fig.add_subplot(1, 1, 1)
 ax.errorbar(pressures_BX_average, gm_BX_weighted_average, yerr=gm_BX_weighted_error, fmt='o')
 ax.errorbar(pressures_KMI_average, gm_KMI_weighted_average, yerr=gm_KMI_weighted_error, fmt='*')
@@ -102,11 +102,11 @@ ax.set_xscale('log')
 ax.set_xlim([1, 100])
 ax.set_ylim([0, 45])
 pylab.rcParams["legend.numpoints"] = 1
-pylab.rcParams.update({'font.size': 22})
+#pylab.rcParams.update({'font.size': 22})
 pylab.grid(True)
 pylab.xlabel("Atmospheric pressure (kPa)")
 pylab.ylabel("Flux (counts/s)")
 pylab.legend(["BEXUS", "RMIB", "RMIN"])
-pylab.savefig("totalcounts_compared_05kPa_binsize.png")
+pylab.savefig("totalcounts_compared_05kPa_binsize.png", dpi=1200)
 
 pylab.show()
